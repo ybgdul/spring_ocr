@@ -1,5 +1,6 @@
 package spring_ocr.pdfscanner.Entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +21,7 @@ public class AppUser {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique=true)
     private String username;
-    private String hashedPassword;
+    private String ownHashedPassword;
 }
