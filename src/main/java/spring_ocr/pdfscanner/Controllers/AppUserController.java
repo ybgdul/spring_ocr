@@ -27,7 +27,7 @@ public class AppUserController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()); 
     }
 
-    
+    //gotta add methods 
     
 
 }
