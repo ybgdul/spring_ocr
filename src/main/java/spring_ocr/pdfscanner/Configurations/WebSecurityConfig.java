@@ -8,17 +8,23 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import spring_ocr.pdfscanner.Security.JwtTokenFilter;
+import spring_ocr.pdfscanner.Security.JwtTokenProvider;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfiguration{
+@RequiredArgsConstructor
+public class WebSecurityConfig {
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -27,9 +33,8 @@ public class WebSecurityConfig extends WebSecurityConfiguration{
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(request -> request.requestMatchers("/users/signin", "/users/signup").permitAll().anyRequest().authenticated());
         http.exceptionHandling(exception -> exception.accessDeniedHandler( (request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, "access denied")));
-        
-        http.authorizeHttpRequests(request -> request.anyRequest().authenticated());
-
+        http.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         return http.build();
      }
 

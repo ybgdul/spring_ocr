@@ -3,10 +3,14 @@ package spring_ocr.pdfscanner.Security;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,22 +18,31 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import spring_ocr.pdfscanner.Utilities.Enums.UserRoleEnum;
+import spring_ocr.pdfscanner.Utilities.Exceptions.CustomException;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
     
-    private final AppUserDetails userDetails;
+    private final AppUserDetails appUserDetails;
 
-    @Value("hz")
+    @Value("${secret.key}")
     private String secretKey;
-    @Value("hz2")
+    @Value("${validity}")
     private Long validity;
 
     private SecretKey signingKey;
+    
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+    
 
     @PostConstruct
     protected void init() {
@@ -41,21 +54,21 @@ public class JwtTokenProvider {
         }
     }
 
-    public String createToken(String username, List<AppUserRole> appUserRoles) {
-        List<String> roleNames = appUserRoles.stream().map(AppUserRole::name).collect(Collectors.toList());
+    public String createToken(String username, List<UserRoleEnum> appUserRoles) {
+        List<String> roleNames = appUserRoles.stream().map(UserRoleEnum::name).collect(Collectors.toList());
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date dateValidity = new Date(now.getTime() + validity);
         return Jwts.builder()
             .subject(username)
             .claim("auth", roleNames)
             .issuedAt(now)
-            .expiration(validity)
+            .expiration(dateValidity)
             .signWith(signingKey)
             .compact();
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = myUserDetails.loadUserByUsername(getUsername(token));
+        UserDetails userDetails = appUserDetails.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
