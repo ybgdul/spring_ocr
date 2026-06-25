@@ -36,8 +36,8 @@ public class JwtTokenProvider {
 
     @Value("${secret.key}")
     private String secretKey;
-    @Value("${validity}")
-    private Long validity;
+
+    private Long validity = (long) 3600000;
 
     private SecretKey signingKey;
     
