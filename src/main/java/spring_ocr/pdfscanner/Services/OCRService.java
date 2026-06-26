@@ -2,7 +2,7 @@ package spring_ocr.pdfscanner.Services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.Buffer;
+
 
 import javax.imageio.ImageIO;
 

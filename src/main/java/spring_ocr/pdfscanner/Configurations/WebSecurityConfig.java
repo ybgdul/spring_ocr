@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import spring_ocr.pdfscanner.Security.JwtTokenFilter;
+import spring_ocr.pdfscanner.Filters.JwtTokenFilter;
 import spring_ocr.pdfscanner.Security.JwtTokenProvider;
 
 @Configuration

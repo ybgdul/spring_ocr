@@ -1,4 +1,4 @@
-package spring_ocr.pdfscanner.Security;
+package spring_ocr.pdfscanner.Filters;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import spring_ocr.pdfscanner.Security.JwtTokenProvider;
 import spring_ocr.pdfscanner.Utilities.Exceptions.CustomException;
 
 public class JwtTokenFilter extends OncePerRequestFilter{
