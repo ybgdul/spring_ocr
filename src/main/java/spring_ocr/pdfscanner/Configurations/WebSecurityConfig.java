@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import spring_ocr.pdfscanner.Filters.JwtTokenFilter;
+import spring_ocr.pdfscanner.Filters.RateLimitingFilter;
 import spring_ocr.pdfscanner.Security.JwtTokenProvider;
 
 @Configuration
@@ -25,6 +26,7 @@ import spring_ocr.pdfscanner.Security.JwtTokenProvider;
 public class WebSecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -33,10 +35,16 @@ public class WebSecurityConfig {
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(request -> request.requestMatchers("/users/signin", "/users/signup").permitAll().anyRequest().authenticated());
         http.exceptionHandling(exception -> exception.accessDeniedHandler( (request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, "access denied")));
-        http.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(rateLimitingFilter, JwtTokenFilter.class);
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         return http.build();
-     }
+    }
+
+    @Bean
+    public JwtTokenFilter jwtTokenFilter() { 
+        return new JwtTokenFilter(jwtTokenProvider);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() { 
